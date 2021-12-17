@@ -25,7 +25,7 @@ public class ShippingTokenSupplier {
 
         byte[] simpleBytes = simpleConcatenation.getBytes();
         byte[] base64Encode = base64Encoder.encode(simpleBytes);
-        String base64String = base64Encode.toString();
+        String base64String = new String(base64Encode);
 
         TemporalAccessToken temporalAccessToken =
                 TemporalAccessToken.builder().
