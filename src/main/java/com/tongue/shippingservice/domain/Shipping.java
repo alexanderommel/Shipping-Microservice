@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 public class Shipping {
 
     private @Id @GeneratedValue Long id;
+    private String customerUsername;
     private @NotNull String artifactId;
     private @NotNull String resource;
     private @NotNull String resourceAccessToken;
@@ -58,7 +59,9 @@ public class Shipping {
     @Builder
     public static class Billing{
 
-        BigDecimal charge;
+	BigDecimal total;
+        BigDecimal artifact;
+	BigDecimal fee;
         BigDecimal debt;
         Boolean hasDebts;
 
