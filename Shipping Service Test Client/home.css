@@ -1,0 +1,146 @@
+html{
+    font-family: 'Roboto';
+}
+
+header{
+    display: inline;
+    margin-left: 5%;
+    margin-right: 5%;
+    background-color: white;
+    font-family: 'Roboto';
+    padding-top: 15px;
+    padding-bottom: 10px;
+}
+
+header div:nth-child(1){
+    padding-right: 4px;
+    display: inline-flex;
+    float: left;
+}
+
+header div:nth-child(1) > h2:nth-child(2){
+    padding-left: 4px;
+    color: rgb(61, 216, 100);
+}
+
+header div:nth-child(2){
+    color: rgb(61, 216, 100);
+    float: right;
+    margin: auto;
+    width: fit-content;
+    height: fit-content;
+}
+
+header div:nth-child(2) > img{
+    margin: auto;
+    width: 36px;
+    color: black;
+    height: 36px;
+}
+
+body{
+    margin: 0%;
+    display: flex;
+    flex-direction: column;
+}
+
+
+.presentation{
+    position: relative;
+    text-align: center;
+    color: white;
+    justify-content: center;
+}
+
+.presentation > img{
+    width: 100%;
+    height: 400px;
+}
+
+.presentation > h1{
+    position: absolute;
+    top: 15%;
+    left: 9%;
+}
+
+.presentation > h2{
+    left: 9.5%;
+    font-weight: normal;
+    position: absolute;
+    top: 35%;
+}
+
+.presentation > h3{
+    right: 10%;
+    top: 40%;
+    font-weight: lighter;
+    width: 50%;
+    position: absolute;
+}
+
+.presentation > button{
+    width: 11%;
+    position: absolute;
+    top: 68%;
+    left: 10%;
+}
+
+.features{
+    margin-top: 20px;
+    margin-bottom: 50px;
+    display: flex;
+    flex-direction: column;
+}
+
+.features > header{
+    margin-top: 10px;
+    margin-bottom: 35px;
+    text-align: center;
+}
+
+.features_content{
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+}
+
+.features_content > article{
+    display: flex;
+    flex-direction: column;   
+    margin-left: 6%;
+    margin-right: 6%;
+}
+
+.features_content > * > h3{
+    margin-bottom: 20px;
+}
+
+.features_content > * > img{
+    margin-inline: auto;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 25px;
+}
+
+.interpage{
+    height: 80px;
+    background-color: #F4F4F4;
+}
+
+
+footer{
+    padding-top: 20px;
+    padding-bottom: 10px;
+    padding-inline: 20%;
+    text-align: center;
+    background-color: black;
+    color: white;
+}
+
+footer > * > a{
+    color: white;
+}
+
+a{
+    text-decoration: none;
+}
