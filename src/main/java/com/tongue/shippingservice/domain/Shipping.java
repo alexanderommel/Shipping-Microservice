@@ -59,12 +59,17 @@ public class Shipping {
     @Builder
     public static class Billing{
 
-	BigDecimal total;
+	    BigDecimal total;
         BigDecimal artifact;
-	BigDecimal fee;
+	    BigDecimal fee;
         BigDecimal debt;
         Boolean hasDebts;
+        PaymentMethod paymentMethod;
 
+    }
+
+    public enum PaymentMethod{
+        CASH,CREDIT
     }
 
 }
