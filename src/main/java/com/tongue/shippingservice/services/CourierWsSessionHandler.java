@@ -21,14 +21,22 @@ public class CourierWsSessionHandler {
 
     private SimpUserRegistry userRegistry;
     private SimpMessagingTemplate simpMessagingTemplate;
-    public  String shippingCourierSubscriptionDestination;
+    public String shippingCourierSubscriptionDestination;
 
 
     public CourierWsSessionHandler(@Autowired SimpUserRegistry userRegistry,
                                    @Autowired SimpMessagingTemplate simpMessagingTemplate,
                                    @Value("${shipping.stomp.couriers.deliver}") String shippingCourierDest){
         this.userRegistry=userRegistry;
+        this.simpMessagingTemplate=simpMessagingTemplate;
         this.shippingCourierSubscriptionDestination=shippingCourierDest;
+    }
+
+    public void sendObjectToSubscribedCourier(Object object,
+                                              Courier courier,
+                                              String dest){
+        log.info("Sending object to user: "+courier.getUsername());
+        this.simpMessagingTemplate.convertAndSendToUser(courier.getUsername(),dest,object);
     }
 
     public void sendShippingNotificationToSubscribedCourier(ShippingNotification notification,

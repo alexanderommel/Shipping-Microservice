@@ -1,5 +1,6 @@
 package com.tongue.shippingservice.services;
 
+import com.tongue.shippingservice.domain.Artifact;
 import com.tongue.shippingservice.domain.Courier;
 import com.tongue.shippingservice.domain.Position;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,72 @@ public class CourierSessionHandler {
                     userSessions.entrySet()) {
                 Session session = entry.getValue();
                 session.setAttribute("STATUS",status);
+                sessionRepository.save(session);
+            }
+            return Boolean.TRUE;
+        }catch (Exception e){
+            return Boolean.FALSE;
+        }
+    }
+
+    public Boolean removeArtifact(Courier courier){
+        log.info("Removing Artifact from session");
+        try {
+            Map<String, ? extends Session> userSessions =
+                    sessionRepository.findByPrincipalName(courier.getUsername());
+            for (Map.Entry<String, ? extends Session> entry:
+                    userSessions.entrySet()) {
+                Session session = entry.getValue();
+                session.removeAttribute("ARTIFACT");
+                sessionRepository.save(session);
+            }
+            return Boolean.TRUE;
+        }catch (Exception e){
+            return Boolean.FALSE;
+        }
+    }
+
+    public Boolean attachArtifact(Artifact artifact, Courier courier){
+        log.info("Setting Artifact: "+artifact);
+        try {
+            Map<String, ? extends Session> userSessions =
+                    sessionRepository.findByPrincipalName(courier.getUsername());
+            for (Map.Entry<String, ? extends Session> entry:
+                    userSessions.entrySet()) {
+                Session session = entry.getValue();
+                session.setAttribute("ARTIFACT",artifact);
+                sessionRepository.save(session);
+            }
+            return Boolean.TRUE;
+        }catch (Exception e){
+            return Boolean.FALSE;
+        }
+    }
+
+    public Artifact getArtifact(Courier courier){
+        log.info("Getting Artifact from: "+courier.getUsername());
+        Artifact artifact;
+        Map<String, ? extends Session> userSessions =
+                sessionRepository.findByPrincipalName(courier.getUsername());
+        for (Map.Entry<String, ? extends Session> entry:
+                    userSessions.entrySet()) {
+            Session session = entry.getValue();
+            artifact = session.getAttribute("ARTIFACT");
+            return artifact;
+        }
+        return null;
+    }
+
+    public Boolean savePosition(Position position, Courier courier){
+        try {
+            Map<String,Session> sessionsMap =
+                    sessionRepository.findByPrincipalName(courier.getUsername());
+            log.info("Persisting position {latitude:"
+                    +position.getLatitude()+",longitude:"+position.getLongitude()+"}");
+            for (Map.Entry<String,Session> sessionMap:
+                    sessionsMap.entrySet()) {
+                Session session = sessionMap.getValue();
+                session.setAttribute("POSITION",position);
                 sessionRepository.save(session);
             }
             return Boolean.TRUE;

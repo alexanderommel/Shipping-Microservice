@@ -19,10 +19,7 @@ import java.math.BigDecimal;
 public class Shipping {
 
     private @Id @GeneratedValue Long id;
-    private String customerUsername;
-    private @NotNull String artifactId;
-    private @NotNull String resource;
-    private @NotNull String resourceAccessToken;
+    private Artifact artifact;
     private @NotNull Billing billing;
     private Shipping.Status status;
     @ManyToOne
@@ -49,7 +46,7 @@ public class Shipping {
     private Position destination;
 
     public enum Status{
-        PENDING,ACCEPTED,FINISHED,CANCELLED_BY_CUSTOMER,CANCELLED_BY_COURIER,CANCELLED_BY_SYSTEM
+        PENDING,ACCEPTED,CONFIRMED,FINISHED,CANCELLED_BY_CUSTOMER,CANCELLED_BY_COURIER,CANCELLED_BY_SYSTEM
     }
 
     @Embeddable
