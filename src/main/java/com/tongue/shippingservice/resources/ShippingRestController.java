@@ -5,6 +5,7 @@ import com.tongue.shippingservice.repositories.ShippingRepository;
 import com.tongue.shippingservice.services.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.geo.Distance;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +42,6 @@ public class ShippingRestController {
         TemporalAccessToken temporalAccessToken =
                 tokenDecoder.decodeBase64TemporalAccessToken(base64TemporalToken);
         log.info("Validating");
-        System.out.println(temporalAccessToken);
         Boolean valid = temporalAccessToken.validate();
         if (!valid){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -79,9 +79,10 @@ public class ShippingRestController {
 
     /** Unsecured **/
 
+    @Profile("test")
     @GetMapping("/shipping/test")
-    public String test(){
-        return "Test";
+    public Boolean test(){
+        return true;
     }
 
 }

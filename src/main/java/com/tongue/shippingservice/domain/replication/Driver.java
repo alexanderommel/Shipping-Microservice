@@ -15,17 +15,21 @@ import javax.persistence.Id;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+
+/**
+ *
+ * Replicated Entity from Driver Management Service
+ *
+ */
 public class Driver {
 
     private @Id @GeneratedValue Long id;
     private String username;
-    private AccountStatus accountStatus;
+    private String firstname;
+    private String lastname;
+    private String imageUrl;
     private Type type;
     private VehicleInfo vehicleInfo;
-
-    public enum AccountStatus{
-        ACTIVE,BANNED,RESTRICTED
-    }
 
     public enum Type{
         RIDER,COURIER
