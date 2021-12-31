@@ -1,6 +1,5 @@
 package com.tongue.shippingservice.services;
 
-import com.tongue.shippingservice.core.utils.SimpUtils;
 import com.tongue.shippingservice.domain.Courier;
 import com.tongue.shippingservice.domain.ShippingNotification;
 import lombok.extern.slf4j.Slf4j;

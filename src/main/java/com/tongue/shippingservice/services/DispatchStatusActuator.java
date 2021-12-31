@@ -1,5 +1,6 @@
 package com.tongue.shippingservice.services;
 
+import com.tongue.shippingservice.domain.Artifact;
 import com.tongue.shippingservice.domain.Courier;
 import com.tongue.shippingservice.domain.Shipping;
 import com.tongue.shippingservice.repositories.ShippingRepository;
@@ -20,10 +21,6 @@ public class DispatchStatusActuator {
         this.shippingRepository=shippingRepository;
     }
 
-    public Boolean onSuccessfulShippingDispatch(Courier courier){
-        Boolean solved = sessionHandler.updateCourierStatus(Courier.status.BUSY, courier);
-        return solved;
-    }
 
     public Shipping onInternalErrorShippingDispatch(Shipping shipping){
         shipping.setStatus(Shipping.Status.CANCELLED_BY_SYSTEM);

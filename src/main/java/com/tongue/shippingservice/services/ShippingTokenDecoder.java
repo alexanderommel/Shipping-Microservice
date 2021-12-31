@@ -14,6 +14,7 @@ public class ShippingTokenDecoder {
     private Base64.Decoder decoder = Base64.getDecoder();
 
     public TemporalAccessToken decodeBase64TemporalAccessToken(String base64Encoding){
+        log.info("Base64 TemporalAccessToken Decoding");
         byte[] bytes = base64Encoding.getBytes();
         byte[] decoded = decoder.decode(bytes);
         String object = new String(decoded);
@@ -33,6 +34,7 @@ public class ShippingTokenDecoder {
                         .expirationMinute(Integer.parseInt(expirationMinute))
                         .expirationSecond(Integer.parseInt(expirationSecond))
                 .build();
+        log.info("Successful Decoding");
         return temporalAccessToken;
     }
 }
