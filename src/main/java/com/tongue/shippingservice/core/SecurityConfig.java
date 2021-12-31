@@ -13,8 +13,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private DriverJwtAuthenticationFilter driverJwtAuthenticationFilter;
+    private CustomerJwtAuthenticationFilter customerJwtAuthenticationFilter;
 
-    public SecurityConfig(@Autowired DriverJwtAuthenticationFilter driverJwtAuthenticationFilter){
+    public SecurityConfig(@Autowired DriverJwtAuthenticationFilter driverJwtAuthenticationFilter,
+                          @Autowired CustomerJwtAuthenticationFilter customerJwtAuthenticationFilter){
+
+        this.customerJwtAuthenticationFilter=customerJwtAuthenticationFilter;
         this.driverJwtAuthenticationFilter=driverJwtAuthenticationFilter;
 
     }
@@ -26,6 +30,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(driverJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(customerJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .csrf().disable()
                 .httpBasic().disable()
                 .formLogin().disable();

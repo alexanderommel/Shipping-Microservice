@@ -26,56 +26,56 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class DriverJwtAuthenticationFilter extends OncePerRequestFilter {
-
-    private final String dmSecretKey;
+public class CustomerJwtAuthenticationFilter extends OncePerRequestFilter {
+    
+    private final String cmSecretKey;
     private final String header;
     private final String prefix;
     private RememberMeServices rememberMeServices = new NullRememberMeServices();
-    private DriverAuthenticationManager authenticationManager;
 
-    public DriverJwtAuthenticationFilter(@Value("${driver.management.service.key}") String secretKey,
-                                         @Autowired DriverAuthenticationManager authenticationManager){
-
-        this.dmSecretKey=secretKey;
+    public CustomerJwtAuthenticationFilter(@Value("${customer.management.service.key}") String secretKey,
+                                           @Autowired DriverAuthenticationManager authenticationManager){
+        
+        this.cmSecretKey=secretKey;
         this.header="Authorization";
         this.prefix="Bearer ";
-        this.authenticationManager=authenticationManager;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        log.info("Driver Management Service Authorization");
+        Authentication authentication1 = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication1 != null) {
+            filterChain.doFilter(request,response);
+            return;
+        }
+        log.info("Customer Management Service Authorization");
         if (!SecurityUtils.containsJwtToken(request,header,prefix)){
             log.info("Filter called but no JWTToken detected");
             handleError(request,response,filterChain);
             return;
         }
         try {
-
-            Claims claims = SecurityUtils.validateJWT(request,dmSecretKey,header,prefix);
+            log.info("Validating JWT");
+            log.info("Customers Secret Key: "+cmSecretKey);
+            Claims claims = SecurityUtils.validateJWT(request,cmSecretKey,header,prefix);
 
             if (claims==null)
                 throw new MalformedJwtException("Invalid JWT");
+
+            log.info("Claims not null");
 
             if (!SecurityUtils.containsRequiredValues(claims)){
                 log.info("Missing Claims");
                 handleError(request,response,filterChain);
                 return;
             }
-            if (!SecurityUtils.validIssuerAndAudience(claims,"driver-management-service")){
+            if (!SecurityUtils.validIssuerAndAudience(claims,"customer-management-service")){
                 log.info("Bad identity");
                 handleError(request,response,filterChain);
                 return;
             }
 
             Authentication authentication = SecurityUtils.wrapAuthenticationTokenFromClaims(claims);
-            if (authentication==null){
-                throw new MalformedJwtException("Bad Claims");
-            }
-            log.info("Authentication...");
-            authentication = authenticationManager.authenticate(authentication);
-            log.info("Successful authentication");
             SecurityContext context = SecurityContextHolder.createEmptyContext();
             context.setAuthentication(authentication);
             SecurityContextHolder.setContext(context);
@@ -90,12 +90,6 @@ public class DriverJwtAuthenticationFilter extends OncePerRequestFilter {
             log.warn("Exception throw: "+e.getMessage());
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.sendError(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
-            return;
-
-        }catch (AuthenticationException e){
-            log.warn("User not registered on database");
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.sendError(HttpServletResponse.SC_NOT_FOUND,e.getMessage());
             return;
         }catch (IllegalArgumentException e){
             log.info("Empty JWT");
@@ -112,5 +106,4 @@ public class DriverJwtAuthenticationFilter extends OncePerRequestFilter {
         this.rememberMeServices.loginFail(request,response);
         filterChain.doFilter(request,response);
     }
-
 }
