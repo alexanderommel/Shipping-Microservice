@@ -1,41 +1,42 @@
 package com.tongue.shippingservice.services;
 
 import com.tongue.shippingservice.domain.*;
-import com.tongue.shippingservice.domain.replication.Driver;
-import com.tongue.shippingservice.repositories.ShippingRepository;
+import com.tongue.shippingservice.domain.replication.Customer;
+import com.tongue.shippingservice.messaging.ShippingEventPublisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.time.LocalTime;
-import java.util.Optional;
 import java.util.Stack;
 
 @Service
 @Slf4j
 public class Dispatcher {
 
-    @Value("${shipping.stomp.couriers.deliver}")
+
     private String couriersSubscriptionDestination;
     private ShippingTokenSupplier tokenSupplier;
     private DispatchTracking dispatchTracking;
-    private DispatchStatusActuator statusActuator;
+    private ShippingEventPublisher shippingEventPublisher;
     private CourierWsSessionHandler wsSessionHandler;
+    private CustomerWsSessionHandler customerWsSessionHandler;
+
     public Dispatcher(@Autowired ShippingTokenSupplier tokenSupplier,
                       @Autowired DispatchTracking dispatchTracking,
-                      @Autowired DispatchStatusActuator statusActuator,
-                      @Autowired CourierWsSessionHandler wsSessionHandler){
+                      @Autowired ShippingEventPublisher shippingEventPublisher,
+                      @Autowired CourierWsSessionHandler wsSessionHandler,
+                      @Autowired CustomerWsSessionHandler customerWsSessionHandler,
+                      @Value("${shipping.stomp.couriers.deliver}") String couriersSubscriptionDestination){
 
         this.tokenSupplier=tokenSupplier;
         this.dispatchTracking=dispatchTracking;
-        this.statusActuator=statusActuator;
+        this.shippingEventPublisher = shippingEventPublisher;
         this.wsSessionHandler=wsSessionHandler;
+        this.customerWsSessionHandler=customerWsSessionHandler;
+        this.couriersSubscriptionDestination=couriersSubscriptionDestination;
 
     }
 
@@ -51,9 +52,9 @@ public class Dispatcher {
         log.info("Declaring ShippingNotification");
         ShippingNotification notification = ShippingNotification.builder().
                 shippingId(String.valueOf(shipping.getId())).
-                artifactId(String.valueOf(shipping.getArtifactId())).
+                artifactId(String.valueOf(shipping.getArtifact().getArtifactId())).
                 origin(shipping.getOrigin()).
-                artifactResource(shipping.getResource()).build();
+                artifactResource(shipping.getArtifact().getResource()).build();
 
         for (Courier courier:
              couriers) {
@@ -65,23 +66,23 @@ public class Dispatcher {
                     expiration
             );
             notification.setAccessToken(accessToken.getBase64Encoding());
-            /** STOMP Publication**/
+            /** Send shipping request notification to courier and send courier pos to customer **/
             wsSessionHandler.sendShippingNotificationToSubscribedCourier(notification,
                     courier,
                     couriersSubscriptionDestination);
-            /** **/
+            Customer customer = Customer.builder().username(shipping.getArtifact().getOwner()).build();
+            customerWsSessionHandler.sendCandidatePositionToCustomer(courier.getPosition(),customer);
+
+            /** Accepted? **/
             wait(parameters);
             dispatcherMessage = dispatchTracking.shippingStatus(shipping,courier);
             DispatcherMessage.DispatchStatus status = dispatcherMessage.getStatus();
             if (status== DispatcherMessage.DispatchStatus.INTERNAL_ERROR){
-                statusActuator.onInternalErrorShippingDispatch(shipping);
+                shippingEventPublisher.publishShippingRequestDeleted(shipping);
                 break;
             }
-            if (status== DispatcherMessage.DispatchStatus.NOT_FOUND){
-                continue;
-            }
             if (status== DispatcherMessage.DispatchStatus.DISPATCHED){
-                statusActuator.onSuccessfulShippingDispatch(courier);
+                shippingEventPublisher.publishShippingRequestAccepted(shipping.getArtifact(),courier, shipping.getId());
                 return dispatcherMessage;
             }
         }
