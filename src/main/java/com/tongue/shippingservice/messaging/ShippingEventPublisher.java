@@ -3,10 +3,9 @@ package com.tongue.shippingservice.messaging;
 import com.tongue.shippingservice.domain.Artifact;
 import com.tongue.shippingservice.domain.Courier;
 import com.tongue.shippingservice.domain.Shipping;
-import com.tongue.shippingservice.messaging.events.ShippingCompletionEvent;
-import com.tongue.shippingservice.messaging.events.ShippingContinuationEvent;
-import com.tongue.shippingservice.messaging.events.ShippingRequestAcceptedEvent;
-import com.tongue.shippingservice.messaging.events.ShippingRequestDeletedEvent;
+import com.tongue.shippingservice.messaging.domain.ShippingRequest;
+import com.tongue.shippingservice.messaging.domain.ShippingRequestRejection;
+import com.tongue.shippingservice.messaging.events.*;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
@@ -33,5 +32,9 @@ public class ShippingEventPublisher {
 
     public void publishShippingCompletion(Shipping shipping, Courier courier){
         publisher.publishEvent(new ShippingCompletionEvent(this,shipping,courier));
+    }
+
+    public void publishShippingRequestRejection(ShippingRequestRejection requestRejection){
+        publisher.publishEvent(new ShippingRequestRejectedEvent(this, requestRejection));
     }
 }
