@@ -2,11 +2,14 @@ package com.tongue.shippingservice.messaging;
 
 import com.tongue.shippingservice.domain.Artifact;
 import com.tongue.shippingservice.domain.Courier;
-import com.tongue.shippingservice.domain.ShipmentAcceptation;
+import com.tongue.shippingservice.messaging.domain.ShipmentAcceptation;
 import com.tongue.shippingservice.domain.Shipping;
 import com.tongue.shippingservice.domain.replication.Customer;
+import com.tongue.shippingservice.messaging.domain.ShippingRequest;
+import com.tongue.shippingservice.messaging.domain.ShippingRequestRejection;
 import com.tongue.shippingservice.messaging.events.ShippingRequestAcceptedEvent;
 import com.tongue.shippingservice.messaging.events.ShippingRequestDeletedEvent;
+import com.tongue.shippingservice.messaging.events.ShippingRequestRejectedEvent;
 import com.tongue.shippingservice.repositories.ShippingRepository;
 import com.tongue.shippingservice.services.CourierSessionHandler;
 import com.tongue.shippingservice.services.CustomerWsSessionHandler;
@@ -53,8 +56,30 @@ public class ShippingRequestEventListener {
 
         /** Publishing the message to the respective Queue **/
 
+        ShipmentAcceptation acceptation = ShipmentAcceptation.builder()
+                .shippingId(String.valueOf(shippingId))
+                .artifactId(artifact.getArtifactId())
+                .driverUsername(courier.getUsername())
+                .build();
+
+        queuePublisher.sendShippingAcceptedMessageToRabbitMQ(acceptation);
 
     }
+
+    @Async
+    @EventListener
+    public void handleShippingRequestRejectedEvent(ShippingRequestRejectedEvent event){
+        log.info("Handling ShippingRequestRejectedEvent");
+        ShippingRequestRejection rejection = event.getRequestRejection();
+        log.info("Rejection details: "+rejection);
+        if (rejection.getReason()== ShippingRequestRejection.Reason.NOT_ACCEPTED){
+            shippingRepository.delete(Shipping.builder().id(rejection.getShippingId()).build());
+        }
+        queuePublisher.sendShippingRequestRejectionToRabbitMQ(rejection);
+    }
+
+
+    /** Throw when corrupted calls are executed**/
 
     @Async
     @EventListener
