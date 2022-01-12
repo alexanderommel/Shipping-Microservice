@@ -15,26 +15,32 @@ public class ShippingTokenDecoder {
 
     public TemporalAccessToken decodeBase64TemporalAccessToken(String base64Encoding){
         log.info("Base64 TemporalAccessToken Decoding");
-        byte[] bytes = base64Encoding.getBytes();
-        byte[] decoded = decoder.decode(bytes);
-        String object = new String(decoded);
-        String[] maps = object.split(",");
-        String[] keyMap = maps[0].split(":");
-        String key = keyMap[1];
-        String[] hourMap = maps[1].split(":");
-        String expirationHour = hourMap[1];
-        String[] minuteMap = maps[2].split(":");
-        String expirationMinute = minuteMap[1];
-        String[] secondMap = maps[3].split(":");
-        String expirationSecond = secondMap[1];
-        TemporalAccessToken temporalAccessToken =
-                TemporalAccessToken.builder()
-                        .key(key)
-                        .expirationHour(Integer.parseInt(expirationHour))
-                        .expirationMinute(Integer.parseInt(expirationMinute))
-                        .expirationSecond(Integer.parseInt(expirationSecond))
-                .build();
-        log.info("Successful Decoding");
+        TemporalAccessToken temporalAccessToken;
+        try {
+            byte[] bytes = base64Encoding.getBytes();
+            byte[] decoded = decoder.decode(bytes);
+            String object = new String(decoded);
+            String[] maps = object.split(",");
+            String[] keyMap = maps[0].split(":");
+            String key = keyMap[1];
+            String[] hourMap = maps[1].split(":");
+            String expirationHour = hourMap[1];
+            String[] minuteMap = maps[2].split(":");
+            String expirationMinute = minuteMap[1];
+            String[] secondMap = maps[3].split(":");
+            String expirationSecond = secondMap[1];
+            temporalAccessToken =
+                    TemporalAccessToken.builder()
+                            .key(key)
+                            .expirationHour(Integer.parseInt(expirationHour))
+                            .expirationMinute(Integer.parseInt(expirationMinute))
+                            .expirationSecond(Integer.parseInt(expirationSecond))
+                            .build();
+            log.info("Successful Decoding");
+        }catch (Exception e){
+            log.info(e.getMessage());
+            temporalAccessToken=null;
+        }
         return temporalAccessToken;
     }
 }
