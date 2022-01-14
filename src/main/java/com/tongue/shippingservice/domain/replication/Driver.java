@@ -37,7 +37,10 @@ public class Driver {
 
     @Embeddable
     @Data
-    public class VehicleInfo{
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class VehicleInfo{
         String vehicle_color;
         String vehicle_brand;
         String vehicle_imageUrl;

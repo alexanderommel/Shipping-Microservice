@@ -40,7 +40,6 @@ public class Dispatcher {
 
     }
 
-    @Async
     public DispatcherMessage dispatchShipping(Stack<Courier> couriers,
                                               Shipping shipping,
                                               DispatchParameters parameters){
