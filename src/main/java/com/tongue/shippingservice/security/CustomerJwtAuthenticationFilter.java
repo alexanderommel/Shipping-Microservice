@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Component
 public class CustomerJwtAuthenticationFilter extends OncePerRequestFilter {
     
     private final String cmSecretKey;

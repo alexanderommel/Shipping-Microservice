@@ -15,25 +15,35 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private DriverJwtAuthenticationFilter driverJwtAuthenticationFilter;
     private CustomerJwtAuthenticationFilter customerJwtAuthenticationFilter;
 
-    public SecurityConfig(@Autowired DriverJwtAuthenticationFilter driverJwtAuthenticationFilter,
+   /* public SecurityConfig(@Autowired DriverJwtAuthenticationFilter driverJwtAuthenticationFilter,
                           @Autowired CustomerJwtAuthenticationFilter customerJwtAuthenticationFilter){
 
         this.customerJwtAuthenticationFilter=customerJwtAuthenticationFilter;
         this.driverJwtAuthenticationFilter=driverJwtAuthenticationFilter;
 
-    }
+    }*/
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .anyRequest().authenticated()
+                .antMatchers("/drivers/**").permitAll()
+        .and()
+        .formLogin().disable()
+        .httpBasic().disable();
+
+        /*http
+                .authorizeRequests()
+                .antMatchers("/shipping/**")
+                .authenticated()
                 .and()
                 .addFilterBefore(driverJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(customerJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .csrf().disable()
+                .cors().disable()
                 .httpBasic().disable()
-                .formLogin().disable();
+                .formLogin().disable();*/
+
     }
 
 }
