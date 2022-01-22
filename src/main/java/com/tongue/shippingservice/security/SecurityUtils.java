@@ -24,6 +24,19 @@ public class SecurityUtils {
         return !(issuer==null || audience==null || id==null || authorities==null || subject==null);
     }
 
+    public static Claims validateJwtFromPlainString(String token, String key, String header, String prefix){
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(key.getBytes())
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claims;
+        }catch (Exception e){
+            log.info(e.getMessage());
+        }
+        return null;
+    }
+
     public static Claims validateJWT(HttpServletRequest request, String key, String header, String prefix){
         String token = request.getHeader(header).replace(prefix,"");
         try {
@@ -42,6 +55,7 @@ public class SecurityUtils {
         String authorization = request.getHeader(header);
         if (authorization==null)
             return false;
+        log.info("Authorization header: "+authorization);
         if (!authorization.startsWith(prefix))
             return false;
         return true;
