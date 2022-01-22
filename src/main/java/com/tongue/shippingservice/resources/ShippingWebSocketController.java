@@ -1,6 +1,10 @@
 package com.tongue.shippingservice.resources;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tongue.shippingservice.domain.*;
+import com.tongue.shippingservice.domain.dto.ShippingAcceptDTO;
 import com.tongue.shippingservice.domain.replication.Customer;
 import com.tongue.shippingservice.domain.replication.Driver;
 import com.tongue.shippingservice.messaging.ShippingEventPublisher;
@@ -17,7 +21,9 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.security.Principal;
 import java.util.Optional;
@@ -34,6 +40,7 @@ public class ShippingWebSocketController {
     private String shippingGeolocationDest;
     private ShippingEventPublisher publisher;
     private ShippingTokenDecoder tokenDecoder;
+    private ObjectMapper mapper = new ObjectMapper();
 
     public ShippingWebSocketController(@Autowired ShippingRepository shippingRepository,
                                        @Autowired CourierWsSessionHandler courierWsSessionHandler,
@@ -57,11 +64,15 @@ public class ShippingWebSocketController {
 
     @MessageMapping("/shipping/accept")
     //@SendToUser("/queue/shipping/response")
-    public void acceptRequest(Long shippingId, Principal principal, String accessToken, HttpSession session){
+    public void acceptRequest(@RequestBody ShippingAcceptDTO dto, Principal principal){
 
-        Courier.status status = (Courier.status) session.getAttribute("STATUS");
+        Long shippingId = dto.getShippingId();
+        String accessToken = dto.getAccessToken();
+
         Courier courier = Courier.builder().username(principal.getName()).build();
+        Courier.status status = sessionHandler.getStatus(courier);
 
+        log.info("Courier Status: "+status);
         if (status != Courier.status.READY) {
             log.warn("Only Couriers with status READY can accept requests");
             courierWsSessionHandler.
@@ -121,8 +132,10 @@ public class ShippingWebSocketController {
 
     @MessageMapping("/shipping/continue")
     @SendToUser("/queue/shipping/destination")
-    public ShippingDestination continueShipping(HttpSession httpSession){
-        Artifact artifact = (Artifact) httpSession.getAttribute("ARTIFACT");
+    public ShippingDestination continueShipping(Principal principal){
+
+        Courier courier = Courier.builder().username(principal.getName()).build();
+        Artifact artifact = sessionHandler.getArtifact(courier);
         if (artifact==null){
             log.warn("No artifact attached to this session");
             return null;
@@ -146,8 +159,10 @@ public class ShippingWebSocketController {
     }
 
     @MessageMapping("/shipping/complete")
-    public Boolean finishShipping(HttpSession httpSession, Principal principal){
-        Artifact artifact = (Artifact) httpSession.getAttribute("ARTIFACT");
+    public Boolean finishShipping(Principal principal){
+
+        Courier courier = Courier.builder().username(principal.getName()).build();
+        Artifact artifact = sessionHandler.getArtifact(courier);
         if (artifact==null){
             log.warn("No artifact attached to this session");
             return false;
@@ -158,20 +173,23 @@ public class ShippingWebSocketController {
             log.warn("ShippingStatus must be CONFIRMED to be able to finish");
             return false;
         }
-        Courier courier = Courier.builder().username(principal.getName()).build();
         publisher.publishShippingCompletion(shipping,courier);
         return true;
     }
 
     @MessageMapping("/shipping/position/share")
     public void sharePosition(Position position, Principal principal){
-
+        log.info("User ("+principal.getName()+") sharing position");
         /** Scene: Courier shares his position
          *  Expected: Courier position stored on RedisSession attribute 'POSITION'
          *  and sent to the artifact's owner**/
 
         if (position==null){
             log.warn("Position shouldn't be a null object");
+            return;
+        }
+        if (principal==null){
+            log.warn("Principal shouldn't be empty");
             return;
         }
         if (position.getLongitude()==null || position.getLatitude()==null){
