@@ -32,8 +32,7 @@ public class CustomerJwtAuthenticationFilter extends OncePerRequestFilter {
     private final String prefix;
     private RememberMeServices rememberMeServices = new NullRememberMeServices();
 
-    public CustomerJwtAuthenticationFilter(@Value("${customer.management.service.key}") String secretKey,
-                                           @Autowired DriverAuthenticationManager authenticationManager){
+    public CustomerJwtAuthenticationFilter(@Value("${customer.management.service.key}") String secretKey){
         
         this.cmSecretKey=secretKey;
         this.header="Authorization";
@@ -42,12 +41,13 @@ public class CustomerJwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        log.info("Customer Management Service Authorization");
         Authentication authentication1 = SecurityContextHolder.getContext().getAuthentication();
         if (authentication1 != null) {
+            log.info("Stopping since there's a no null SecurityContext");
             filterChain.doFilter(request,response);
             return;
         }
-        log.info("Customer Management Service Authorization");
         if (!SecurityUtils.containsJwtToken(request,header,prefix)){
             log.info("Filter called but no JWTToken detected");
             handleError(request,response,filterChain);
