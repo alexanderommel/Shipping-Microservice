@@ -21,6 +21,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,17 +43,50 @@ public class DriverJwtAuthenticationFilter extends OncePerRequestFilter {
         this.authenticationManager=authenticationManager;
     }
 
+    public void showHeaders(HttpServletRequest request){
+        log.info("Current Headers on this Request");
+        Enumeration<String> headers = request.getHeaderNames();
+        while (headers.hasMoreElements()){
+            String header = headers.nextElement();
+            log.info("Header: "+header);
+            log.info("Value: "+request.getHeader(header));
+        }
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         log.info("Driver Management Service Authorization");
-        if (!SecurityUtils.containsJwtToken(request,header,prefix)){
-            log.info("Filter called but no JWTToken detected");
-            handleError(request,response,filterChain);
+        Authentication authentication1 = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication1 != null) {
+            log.info("Stopping since there's a no null SecurityContext");
+            filterChain.doFilter(request,response);
             return;
         }
+
+        Boolean hasJwtParameter = Boolean.FALSE;
+        //showHeaders(request);
+        String jwtToken = request.getParameter("jwtToken");
+        if (jwtToken!=null){
+            log.info("Jwt Parameter found!");
+            hasJwtParameter=Boolean.TRUE;
+        }
+        if (!hasJwtParameter){
+            if (!SecurityUtils.containsJwtToken(request,header,prefix)){
+                log.info("Filter called but no JWTToken detected");
+                filterChain.doFilter(request,response);
+                return;
+            }
+        }
+
         try {
 
-            Claims claims = SecurityUtils.validateJWT(request,dmSecretKey,header,prefix);
+            Claims claims;
+
+            if (hasJwtParameter){
+                claims = SecurityUtils.validateJwtFromPlainString(jwtToken,dmSecretKey,header,prefix);
+            }else {
+                claims = SecurityUtils.validateJWT(request,dmSecretKey,header,prefix);
+            }
 
             if (claims==null)
                 throw new MalformedJwtException("Invalid JWT");
@@ -75,6 +109,7 @@ public class DriverJwtAuthenticationFilter extends OncePerRequestFilter {
             log.info("Authentication...");
             authentication = authenticationManager.authenticate(authentication);
             log.info("Successful authentication");
+            log.info(String.valueOf(authentication==null));
             SecurityContext context = SecurityContextHolder.createEmptyContext();
             context.setAuthentication(authentication);
             SecurityContextHolder.setContext(context);
@@ -107,8 +142,8 @@ public class DriverJwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private void handleError(HttpServletRequest request,HttpServletResponse response,FilterChain filterChain) throws ServletException, IOException {
-        SecurityContextHolder.clearContext();
-        this.rememberMeServices.loginFail(request,response);
+        //SecurityContextHolder.clearContext();
+        //this.rememberMeServices.loginFail(request,response);
         filterChain.doFilter(request,response);
     }
 
