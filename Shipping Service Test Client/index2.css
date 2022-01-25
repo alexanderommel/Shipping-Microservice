@@ -1,0 +1,187 @@
+html{
+    font-family: 'Roboto';
+}
+
+header{
+    display: inline;
+    margin-left: 5%;
+    margin-right: 5%;
+    background-color: white;
+    font-family: 'Roboto';
+    padding-top: 15px;
+    padding-bottom: 10px;
+}
+
+header div:nth-child(1){
+    padding-right: 4px;
+    display: inline-flex;
+    float: left;
+}
+
+header div:nth-child(1) > h2:nth-child(2){
+    padding-left: 4px;
+    color: rgb(61, 216, 100);
+}
+
+header div:nth-child(2){
+    color: rgb(61, 216, 100);
+    float: right;
+    margin: auto;
+    width: fit-content;
+    height: fit-content;
+}
+
+header div:nth-child(2) > img{
+    margin: auto;
+    width: 36px;
+    color: black;
+    height: 36px;
+}
+
+body{
+    margin: 0%;
+    display: flex;
+    flex-direction: column;
+}
+
+.main{
+    background: rgb(58,58,58);
+    background: linear-gradient(180deg, rgba(58,58,58,1) 50%, rgba(82,210,118,1) 50%);
+    padding: 5%;
+    height: 700px;
+}
+
+.main_content{
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.intro{
+    border-radius: 8px;
+    text-align: center;
+    display: flex;
+    height: 100%;
+    max-width: 100%;
+    min-width: 30%;
+    font-weight: lighter;
+    width: 30%;
+    flex-direction: column;
+    color: rgb(0, 0, 0);
+    background-color: rgb(255, 255, 255);
+}
+
+.intro > p{
+    color: rgb(97, 97, 97);
+}
+
+.intro > form{
+    padding-top: 10%;
+    height: 100%;
+    background-color: rgb(255, 255, 255);
+}
+
+.intro > * > h1{
+    font-weight: lighter;
+    font-size: calc(10px + 2.2vw);
+    height: 15%;
+    margin-bottom: 0%;
+}
+
+.intro > * > p{
+    font-size: calc(10px + 1vw);
+    margin: 0%;
+    padding-top: 0%;
+    height: 10%;
+}
+
+.intro > * > label{
+    text-align: left;
+    width: 70%;
+    padding-top: 10px;
+    font-size: 20px;
+    margin: 0%;
+    justify-content: center;
+    height: 10%;
+}
+
+.intro > * > input{
+    height: 10%;
+    width: 70%;
+    padding-left: 10px;
+    font-size: 18px;
+    margin: 0%;
+    border: 0.5px solid #f0eaea;
+}
+
+.intro > * > button{
+    background-color: rgb(58,58,58);
+    width: 60%;
+    margin-block: 15%;
+    height: 10%;
+    color: white;
+
+    border: 0;
+    cursor: pointer;
+    font-size: 18px;
+    text-align: center;
+    padding-block: 5px;
+    border-radius: 14px;
+}
+
+.space{
+    height: 54%;
+}
+
+.desc{
+    min-width: 0;
+    min-height: 0;
+    min-block-size: 0%;
+    font-weight: bold;
+    width: 70%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    height: 100%;
+    color: white;
+    font-weight: lighter;
+}
+
+.desc > img{
+    min-width: 0%;
+    min-height: 0%;
+    max-height: 80%;
+    color: ivory;
+    height: 80%;
+    padding: 4%;
+}
+
+.desc > p{
+    min-width: 0%;
+    min-height: 0%;
+    justify-content: center;
+    margin: auto;
+    font-weight: bolder;
+    height: 20%;
+    color: black;
+    font-size: calc(12px + 1vw);
+    padding-inline: 9%;
+}
+
+footer{
+    padding-top: 20px;
+    padding-bottom: 10px;
+    padding-inline: 20%;
+    text-align: center;
+    background-color: black;
+    color: white;
+}
+
+footer > * > a{
+    color: white;
+}
+
+a{
+    text-decoration: none;
+}

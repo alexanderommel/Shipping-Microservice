@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="index2.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <script type="text/javascript" src="scripts/app.js"></script>
     <title>Shipping Testing</title>
 </head>
 <body>
@@ -17,15 +18,16 @@
     <section id="main" class="main">
         <section id="main_content" class="main_content">
             <article id="intro" class="intro">
-                <form>
+                <form name="login">
                     <h1>Authentication</h1>
-                    <p>Drivers Stomp Client</p>
+                    <p>Credentials</p>
                     <label>Username</label><br>
-                    <input type="text" name="User"><br>
+                    <input type="text" name="username" value="bunny"><br>
                     <label>Password</label><br>
-                    <input type="password" name="Password">
-                    <button type="button">Login</button>
+                    <input type="password" name="password" value="bunny">
+                    <button type="button" onclick="authenticate()">Login</button>
                 </form>
+                <p id="authentication_status_p"></p>
             </article>
             <article id="desc" class="desc">
                 <img src="img/3d-car-01.svg">
