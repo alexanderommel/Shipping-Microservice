@@ -88,7 +88,25 @@ public class CourierSessionHandler {
                     userSessions.entrySet()) {
             Session session = entry.getValue();
             artifact = session.getAttribute("ARTIFACT");
-            return artifact;
+            if (artifact!=null){
+                return artifact;
+            }
+        }
+        return null;
+    }
+
+    public Courier.status getStatus(Courier courier){
+        log.info("Getting Status from: "+courier.getUsername());
+        Courier.status status;
+        Map<String, ? extends Session> userSessions =
+                sessionRepository.findByPrincipalName(courier.getUsername());
+        for (Map.Entry<String, ? extends Session> entry:
+                userSessions.entrySet()) {
+            Session session = entry.getValue();
+            status = session.getAttribute("STATUS");
+            if (status!=null){
+                return status;
+            }
         }
         return null;
     }
@@ -107,6 +125,7 @@ public class CourierSessionHandler {
             }
             return Boolean.TRUE;
         }catch (Exception e){
+            log.info(e.getMessage());
             return Boolean.FALSE;
         }
     }
