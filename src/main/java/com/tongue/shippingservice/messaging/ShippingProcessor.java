@@ -47,37 +47,43 @@ public class ShippingProcessor {
 
         ShippingRequestRejection rejection;
 
-        /** Validating **/
+        /** Validating ShippingFeeTokens **/
 
         log.info("ShippingRequest -> "+request);
 
         String shippingFeeToken = request.getShippingFeeToken();
-        TemporalAccessToken temporalAccessToken =
-                tokenDecoder.decodeBase64TemporalAccessToken(shippingFeeToken);
-        if (temporalAccessToken==null){
 
-            rejection = ShippingRequestRejection.builder()
-                    .artifactId(request.getArtifact().getArtifactId())
-                    .reason(ShippingRequestRejection.Reason.BAD_TOKEN)
-                    .details("Invalid format for shipping token")
-                    .build();
+        if (!request.getTesting()){
 
-            eventPublisher.publishShippingRequestRejection(rejection);
-            return;
+            TemporalAccessToken temporalAccessToken =
+                    tokenDecoder.decodeBase64TemporalAccessToken(shippingFeeToken);
+            if (temporalAccessToken==null){
+
+                rejection = ShippingRequestRejection.builder()
+                        .artifactId(request.getArtifact().getArtifactId())
+                        .reason(ShippingRequestRejection.Reason.BAD_TOKEN)
+                        .details("Invalid format for shipping token")
+                        .build();
+
+                eventPublisher.publishShippingRequestRejection(rejection);
+                return;
+            }
+
+            Boolean valid = temporalAccessToken.validate();
+            if (!valid){
+
+                rejection = ShippingRequestRejection.builder()
+                        .artifactId(request.getArtifact().getArtifactId())
+                        .reason(ShippingRequestRejection.Reason.TOKEN_EXPIRED)
+                        .details("Token Time expired")
+                        .build();
+
+                eventPublisher.publishShippingRequestRejection(rejection);
+                return;
+            }
         }
 
-        Boolean valid = temporalAccessToken.validate();
-        if (!valid){
 
-            rejection = ShippingRequestRejection.builder()
-                    .artifactId(request.getArtifact().getArtifactId())
-                    .reason(ShippingRequestRejection.Reason.TOKEN_EXPIRED)
-                    .details("Token Time expired")
-                    .build();
-
-            eventPublisher.publishShippingRequestRejection(rejection);
-            return;
-        }
         /** Search Parameters should be created dynamically**/
 
         SearchParameters params = SearchParameters.builder()
@@ -108,7 +114,7 @@ public class ShippingProcessor {
         shipping = shippingRepository.save(shipping);
 
         DispatchParameters dispatchParameters =
-                DispatchParameters.builder().k(500).intervalSeconds(30).build();
+                DispatchParameters.builder().k(1).intervalSeconds(30).build();
 
         DispatcherMessage message =
                 dispatcher.dispatchShipping(stack,shipping,dispatchParameters);
