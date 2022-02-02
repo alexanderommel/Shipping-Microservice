@@ -1,25 +1,30 @@
 package com.tongue.shippingservice.resources;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonFactoryBuilder;
+import com.tongue.shippingservice.domain.Courier;
 import com.tongue.shippingservice.domain.TemporalAccessToken;
 import com.tongue.shippingservice.domain.replication.Driver;
 import com.tongue.shippingservice.repositories.DriverReplicationRepository;
+import com.tongue.shippingservice.services.CourierSessionHandler;
 import com.tongue.shippingservice.services.ShippingTokenSupplier;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.json.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.boot.json.GsonJsonParser;
+import org.springframework.http.*;
+import org.springframework.http.converter.json.GsonBuilderUtils;
+import org.springframework.http.converter.json.GsonFactoryBean;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.time.LocalTime;
 import java.util.*;
@@ -31,18 +36,30 @@ public class DriverRestController {
 
     DriverReplicationRepository repository;
     ShippingTokenSupplier supplier;
+    CourierSessionHandler courierSessionHandler;
     String secretKey;
 
     public DriverRestController(@Autowired DriverReplicationRepository repository,
                                 @Autowired ShippingTokenSupplier supplier,
+                                @Autowired CourierSessionHandler sessionHandler,
                                 @Value("${driver.management.service.key}") String secretKey){
         this.repository=repository;
         this.supplier=supplier;
+        this.courierSessionHandler=sessionHandler;
         this.secretKey=secretKey;
     }
 
-    @PostMapping(value = "/drivers/login", consumes = "application/json", produces = "application/json")
-    public String login(@RequestBody  String username){
+    @GetMapping("/test")
+    public String hola(){
+        log.info("Test point called");
+        return "hola";
+    }
+
+    // Non secured endpoint for testing purposes
+    @PostMapping( value = "/drivers/oauth", produces = "application/json", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String,String>> login(@RequestBody Driver driver1){
+        Map<String,String> response = new HashMap<>();
+        String username = driver1.getUsername();
         log.info("Creating JWT Token");
         log.info("Username: "+username);
         Optional<Driver> optional = repository.findByUsername(username);
@@ -52,7 +69,24 @@ public class DriverRestController {
         log.info("User exists");
         Driver driver = optional.get();
         String jwt = createValidJWTToken(driver.getUsername());
-        return jwt;
+        response.put("jwt",jwt);
+        return new ResponseEntity<>(response,HttpStatus.OK);
+    }
+
+    // Friendly endpoint to ease the authentication process for Stomp connections
+    @PostMapping(value = "/drivers/jwt",
+            produces = "application/json", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity jwtAuthentication(@Autowired Principal principal){
+        log.info("Jwt Authentication Successful");
+        courierSessionHandler.updateCourierStatus(
+                Courier.status.READY,
+                Courier.builder()
+                        .username(principal.getName())
+                        .build()
+        );
+        if (principal==null)
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     private String createValidJWTToken(String username) {
