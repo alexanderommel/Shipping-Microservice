@@ -59,7 +59,7 @@ public class Dispatcher {
              couriers) {
             log.info("Notifying {User:"+courier.getUsername()+"}");
             LocalTime expiration = LocalTime.now();
-            expiration.plusSeconds(parameters.getIntervalSeconds());
+            expiration = expiration.plusSeconds(parameters.getIntervalSeconds());
             TemporalAccessToken accessToken = tokenSupplier.createBase64TemporalAccessToken(
                     courier.getUsername(),
                     expiration
