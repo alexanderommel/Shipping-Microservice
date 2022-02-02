@@ -19,5 +19,6 @@ public class ShippingRequest {
     private Shipping.Billing billing;
     private Position origin;
     private Position destination;
+    private Boolean testing; // Avoid Token Validation
 
 }
