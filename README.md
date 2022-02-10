@@ -3,7 +3,7 @@
  
 ## Features
 
-- Unit test, Integration test, Websockets testing, Security filters testing, AMPQ testing, E2E test.
+- Unit testing, Integration testing, Websockets testing and Security testing.
 
 - Asynchronous Communication between microservices using AMQP
 
@@ -11,7 +11,7 @@
 
 - Publish/Subscribe Communication with customer/driver android apps using STOMP.
 
-- Data Replication between Microservices Pattern
+- Data Replication between Microservices*
 
 - Session Management with Redis 
 
