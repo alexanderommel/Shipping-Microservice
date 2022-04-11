@@ -3,15 +3,17 @@ package com.tongue.shippingservice.resources;
 import com.tongue.shippingservice.domain.*;
 import com.tongue.shippingservice.repositories.ShippingRepository;
 import com.tongue.shippingservice.services.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.geo.Distance;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
@@ -36,22 +38,26 @@ public class ShippingRestController {
         this.tokenDecoder=tokenDecoder;
     }
 
-    @GetMapping("/shipping/tokens/validate")
-    public ResponseEntity<Map<String,Object>> validateShippingFeeToken(String base64TemporalToken){
-        log.info("Decoding token '"+base64TemporalToken+"'");
+    @GetMapping(value = "/shipping/tokens/validate",params = {"sessionId"})
+    public ResponseEntity<String> validateShippingFeeToken(@RequestParam(name = "sessionId") String sessionId){
+        log.info("Decoding token '"+sessionId+"'");
         TemporalAccessToken temporalAccessToken =
-                tokenDecoder.decodeBase64TemporalAccessToken(base64TemporalToken);
+                tokenDecoder.decodeBase64TemporalAccessToken(sessionId);
         log.info("Validating");
-        Boolean valid = temporalAccessToken.validate();
-        if (!valid){
+        if (temporalAccessToken==null){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+        if (!temporalAccessToken.validate()){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        log.info("Successful Session Validation!");
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping(value = "/shipping/summary")
-    public ResponseEntity<Map<String,Object>> getSummary(Position origin, Position destination){
-        Map<String,Object> response = new HashMap<>();
+    @PostMapping(value = "/shipping/summary")
+    public ResponseEntity<ShippingSummary> getSummary(@RequestBody PositionWrapper wrapper){
+        Position origin = wrapper.getOrigin();
+        Position destination = wrapper.getDestination();
         if (origin==null || destination==null){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -65,7 +71,7 @@ public class ShippingRestController {
         Distance distance = consultant.tripDistance(origin,destination);
         LocalTime arrivalTime = consultant.arrivalTime(origin,destination);
         LocalTime expiration = LocalTime.now();
-        expiration.plusMinutes(1);
+        expiration = expiration.plusMinutes(3);
         log.info("Creating AccessToken with expiration on {"+expiration+"}");
         TemporalAccessToken temporalAccessToken = tokenSupplier.createBase64TemporalAccessToken(fee.toPlainString(),expiration);
         ShippingFee shippingFee =
@@ -73,8 +79,7 @@ public class ShippingRestController {
         ShippingSummary summary =
                 ShippingSummary.builder().shippingFee(shippingFee).distance(distance).arrivalTime(arrivalTime).build();
         log.info("Successful ShippingSummary computed");
-        response.put("response",summary);
-        return new ResponseEntity<>(response,HttpStatus.OK);
+        return new ResponseEntity<>(summary,HttpStatus.OK);
     }
 
     /** Unsecured **/
@@ -83,6 +88,15 @@ public class ShippingRestController {
     @GetMapping("/shipping/test")
     public Boolean test(){
         return true;
+    }
+
+    @Builder
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class PositionWrapper{
+        Position origin;
+        Position destination;
     }
 
 }
