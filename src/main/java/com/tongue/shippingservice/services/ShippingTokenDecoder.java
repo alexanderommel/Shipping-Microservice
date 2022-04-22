@@ -29,13 +29,14 @@ public class ShippingTokenDecoder {
             String expirationMinute = minuteMap[1];
             String[] secondMap = maps[3].split(":");
             String expirationSecond = secondMap[1];
-            temporalAccessToken =
+            TemporalAccessToken temporalAccessToken1 =
                     TemporalAccessToken.builder()
                             .key(key)
                             .expirationHour(Integer.parseInt(expirationHour))
                             .expirationMinute(Integer.parseInt(expirationMinute))
                             .expirationSecond(Integer.parseInt(expirationSecond))
                             .build();
+            temporalAccessToken=temporalAccessToken1;
             log.info("Successful Decoding");
         }catch (Exception e){
             log.info(e.getMessage());
