@@ -5,6 +5,7 @@ import com.tongue.shippingservice.domain.Shipping;
 import org.springframework.data.geo.CustomMetric;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Metric;
+import org.springframework.data.geo.Metrics;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -20,8 +21,7 @@ public class ShippingConsultant {
     }
 
     public Distance tripDistance(Position origin, Position destination){
-        Metric metric = new CustomMetric(1,"km");
-        Distance distance = new Distance(10.5, metric);
+        Distance distance = new Distance(10.5, Metrics.KILOMETERS);
         return distance;
     }
 
