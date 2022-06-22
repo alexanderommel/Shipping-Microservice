@@ -4,6 +4,7 @@ import com.tongue.shippingservice.domain.Courier;
 import com.tongue.shippingservice.domain.Position;
 import com.tongue.shippingservice.domain.Shipping;
 import com.tongue.shippingservice.domain.TemporalAccessToken;
+import com.tongue.shippingservice.domain.dto.ShippingAcceptDTO;
 import com.tongue.shippingservice.domain.replication.Driver;
 import com.tongue.shippingservice.repositories.DriverReplicationRepository;
 import com.tongue.shippingservice.repositories.ShippingRepository;
@@ -35,6 +36,7 @@ import org.springframework.web.socket.messaging.WebSocketStompClient;
 import org.springframework.web.socket.sockjs.client.SockJsClient;
 import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.lang.reflect.Type;
 import java.security.Principal;
@@ -68,7 +70,7 @@ public class ShippingWsControllerIntegrationTest {
     @Mock
     private Principal principal;
     @Mock
-    private HttpSession httpSession;
+    private HttpServletRequest httpSession;
     @LocalServerPort
     private Integer port;
     private WebSocketStompClient webSocketStompClient;
@@ -128,7 +130,12 @@ public class ShippingWsControllerIntegrationTest {
 
         Position position = Position.builder().latitude("1.11").longitude("1.22").build();
         principal = new BasicUserPrincipal("bunny");
-        webSocketController.acceptRequest(null,principal,"access",httpSession);
+        ShippingAcceptDTO dto = ShippingAcceptDTO.builder()
+                .shippingId(null)
+                .accessToken("access")
+                .build();
+        webSocketController.acceptRequest(dto,principal);
+        System.out.println("Test");
         assertEquals("false",blockingQueue.poll(4,TimeUnit.SECONDS));
     }
 
@@ -180,7 +187,11 @@ public class ShippingWsControllerIntegrationTest {
         Principal principal = new BasicUserPrincipal("scooby");
         Mockito.when(httpSession.getAttribute("STATUS")).thenReturn(Courier.status.READY);
         /** Actual Testing **/
-        webSocketController.acceptRequest(shipping.getId(),principal, accessToken.getBase64Encoding(), httpSession);
+        ShippingAcceptDTO dto = ShippingAcceptDTO.builder()
+                .shippingId(shipping.getId())
+                .accessToken(accessToken.getBase64Encoding())
+                .build();
+        webSocketController.acceptRequest(dto,principal);
         assertEquals("true",blockingQueue.poll(4,TimeUnit.SECONDS));
 
     }

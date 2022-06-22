@@ -7,6 +7,14 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+        <!----script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script--->
+        <!---script type="text/javascript" src="node_modules/webstomp-client/dist/webstomp.min.js"></script--->
+        <!--script type="text/javascript" src="scripts/sockjs-0.3.4.js"></script-->
+        <!--script type="text/javascript" src="scripts/stomp.js"></script-->
+        <script type="text/javascript" src="scripts/stomp.umd.min.js"></script>
+        <script type="text/javascript" src="scripts/app_ws.js"></script>
+        <!---script data-main="scripts/main2" src="scripts/require.js"></script--->
+        
         <title>Shipping Testing</title>
     </head>
     <body>
@@ -18,9 +26,10 @@
             <h1>Driver Panel</h1>
             <h2>STOMP Client</h2>
             <h3>To start delivering press the button 'Connect' to inform Tongue Shipping Service to register you as an active courier.</h3>
-            <button type="button" class="btn btn-light">Connect</button>
+            <button type="button" class="btn btn-light" onclick="onConnectButtonClicked()" id="connect_button">Connect</button>
             <img src="img/descarga.jfif">
         </section>
+        <div class="interpage"></div>
         <section class="features">
             <header>
                 <h1>Features</h1>
@@ -44,6 +53,40 @@
             </section>
         </section>
         <div class="interpage"></div>
+        <section class="geolocation">
+            <section class="geolocation_content">
+                <form class="share_panel" name="geolocation_form">
+                    <h1>Geolocation</h1><br>
+                    <label>Latitude:</label>
+                    <input type="text" name="latitude" value="0.0"><br>
+                    <label>Longitude:</label>
+                    <input type="text" name="longitude" value="0.0"><br>
+                    <button type="button" id="share_loc_btn" disabled=true onclick="sharePosition()">Share Location</button>
+                </form>
+                <section class="google_map">
+                    <iframe width="100%" height="100%" src="https://maps.google.com/maps?width=100%&amp;height=600&amp;hl=en&amp;coord=52.70967533219885, -8.020019531250002&amp;q=1%20Grafton%20Street%2C%20Dublin%2C%20Ireland&amp;ie=UTF8&amp;t=&amp;z=14&amp;iwloc=B&amp;output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe><br />
+                </section>
+            </section>
+        </section>
+        <div class="interpage"></div>
+        <section class="messaging_container">
+            <section class="messaging_content">
+                <header class="messaging_header">
+                    <h1>Shipping Request</h1>
+                </header>
+                <section class="messages" id="messages">
+                    <div class="message">
+                        <img src="img/storeic.svg" class="message_img">
+                        <div class="message_info">
+                            <h5>Kentucky Restaurant</h5>
+                            <p>6 de Diciembre y Calle Feliz</p>
+                        </div>
+                        <button class="message_accept_button">Accept</button>
+                        <button class="message_reject_button">Reject</button>
+                    </div>
+                </section>
+            </section>
+        </section>
         <footer>
             <p>Copyright 1925</p>
             <p>To authenticate try some of the next users:</p>

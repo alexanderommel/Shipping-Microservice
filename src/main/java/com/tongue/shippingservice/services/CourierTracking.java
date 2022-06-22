@@ -56,7 +56,7 @@ public class CourierTracking {
             if (!candidates.isEmpty()){
                 log.info("Search has been successful");
                 if (parameters.getStackingMethod()== SearchParameters.StackingMethod.BASIC_EUCLIDEAN){
-                    System.out.println("Stacking...");
+                    log.info("Stacking...");
                     nearestDrivers = courierStacking.basicStackingByEuclideanDistance(
                             candidates,origin.geometricPoint(), parameters.getMax_stack_size());
                     return nearestDrivers;

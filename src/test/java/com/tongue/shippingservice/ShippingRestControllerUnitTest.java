@@ -80,8 +80,12 @@ public class ShippingRestControllerUnitTest {
         HttpStatus expected = HttpStatus.OK;
         Position pos1 = Position.builder().latitude("0").longitude("0").build();
         Position pos2 = Position.builder().latitude("1.222").longitude("1.1222").build();
-        ResponseEntity<Map<String,Object>> response =
-                restController.getSummary(pos1,pos2);
+        ShippingRestController.PositionWrapper wrapper = ShippingRestController.PositionWrapper.builder()
+                .origin(pos1)
+                .destination(pos2)
+                .build();
+        ResponseEntity<ShippingSummary> response =
+                restController.getSummary(wrapper);
         System.out.println(response.toString());
         assertEquals(expected,response.getStatusCode());
     }
@@ -90,8 +94,12 @@ public class ShippingRestControllerUnitTest {
     public void givenEmptyPosition_whenGettingSummary_thenHttpStatusIsBadRequest(){
         HttpStatus expected = HttpStatus.BAD_REQUEST;
         Position pos1 = Position.builder().latitude("0").longitude("0").build();
-        ResponseEntity<Map<String,Object>> response =
-                restController.getSummary(pos1,null);
+        ShippingRestController.PositionWrapper wrapper = ShippingRestController.PositionWrapper.builder()
+                .origin(pos1)
+                .destination(null)
+                .build();
+        ResponseEntity<ShippingSummary> response =
+                restController.getSummary(wrapper);
         System.out.println(response.toString());
         assertEquals(expected,response.getStatusCode());
     }
@@ -99,7 +107,7 @@ public class ShippingRestControllerUnitTest {
     @Test
     public void givenValidToken_whenValidating_thenHttpStatusIsOK(){
         HttpStatus expected = HttpStatus.OK;
-        ResponseEntity<Map<String,Object>> response =
+        ResponseEntity<String> response =
                 restController.validateShippingFeeToken("whatever");
         assertEquals(expected,response.getStatusCode());
     }
