@@ -2,6 +2,7 @@ package com.tongue.shippingservice.resources;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonFactoryBuilder;
+import com.tongue.shippingservice.core.contracts.ApiResponse;
 import com.tongue.shippingservice.domain.Courier;
 import com.tongue.shippingservice.domain.TemporalAccessToken;
 import com.tongue.shippingservice.domain.replication.Driver;
@@ -57,8 +58,7 @@ public class DriverRestController {
 
     // Non secured endpoint for testing purposes
     @PostMapping( value = "/drivers/oauth", produces = "application/json", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String,String>> login(@RequestBody Driver driver1){
-        Map<String,String> response = new HashMap<>();
+    public ResponseEntity<ApiResponse> login(@RequestBody Driver driver1){
         String username = driver1.getUsername();
         log.info("Creating JWT Token");
         log.info("Username: "+username);
@@ -69,14 +69,14 @@ public class DriverRestController {
         log.info("User exists");
         Driver driver = optional.get();
         String jwt = createValidJWTToken(driver.getUsername());
-        response.put("jwt",jwt);
-        return new ResponseEntity<>(response,HttpStatus.OK);
+        log.info("ok");
+        return ResponseEntity.of(Optional.of(ApiResponse.success(jwt)));
     }
 
     // Friendly endpoint to ease the authentication process for Stomp connections
     @PostMapping(value = "/drivers/jwt",
             produces = "application/json", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity jwtAuthentication(@Autowired Principal principal){
+    public ResponseEntity<ApiResponse> jwtAuthentication(@Autowired Principal principal){
         log.info("Jwt Authentication Successful");
         courierSessionHandler.updateCourierStatus(
                 Courier.status.READY,
@@ -86,7 +86,8 @@ public class DriverRestController {
         );
         if (principal==null)
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        return new ResponseEntity(HttpStatus.OK);
+        log.info("ok");
+        return ResponseEntity.of(Optional.of(ApiResponse.success("ok")));
     }
 
     private String createValidJWTToken(String username) {
