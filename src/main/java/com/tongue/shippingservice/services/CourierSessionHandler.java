@@ -138,6 +138,8 @@ public class CourierSessionHandler {
             Boolean alreadyAccepted = Boolean.FALSE;
             String username = simpUser.getName();
             log.info("Candidate: "+username);
+            Object sess = sessionRepository.findByPrincipalName(username);
+            log.info(sess.toString());
             Map<String, ? extends Session> sessions = sessionRepository.findByPrincipalName(username);
             for (Map.Entry<String, ? extends Session> entry:
                     sessions.entrySet()) {

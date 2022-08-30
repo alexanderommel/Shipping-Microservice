@@ -66,8 +66,12 @@ public class DriverJwtAuthenticationFilter extends OncePerRequestFilter {
         Boolean hasJwtParameter = Boolean.FALSE;
         //showHeaders(request);
         String jwtToken = request.getParameter("jwtToken");
+
         if (jwtToken!=null){
             log.info("Jwt Parameter found!");
+            String jwt = jwtToken.substring(7);
+            jwtToken = "Bearer "+jwt;
+            log.info("Token found is: "+jwtToken);
             hasJwtParameter=Boolean.TRUE;
         }
         if (!hasJwtParameter){

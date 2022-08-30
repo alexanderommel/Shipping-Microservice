@@ -29,6 +29,7 @@ public class CourierFiltering {
             log.info("Test Courier: "+courier.getUsername());
             Boolean passTest = geometricCalculation.pointInsideCircle(courier.getPosition().geometricPoint(),
                     circle);
+            passTest = true;
             if (!passTest) {
                 log.info("Rejected");
                 continue;

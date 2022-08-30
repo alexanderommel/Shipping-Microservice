@@ -25,11 +25,15 @@ public class SecurityUtils {
     }
 
     public static Claims validateJwtFromPlainString(String token, String key, String header, String prefix){
+        log.info("Validating Jwt from plain string");
+        String noBearerJwt = token.replace("Bearer ","");
+        System.out.println(noBearerJwt);
         try {
             Claims claims = Jwts.parser()
                     .setSigningKey(key.getBytes())
-                    .parseClaimsJws(token)
+                    .parseClaimsJws(noBearerJwt)
                     .getBody();
+            log.info("ok");
             return claims;
         }catch (Exception e){
             log.info(e.getMessage());
