@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonFactoryBuilder;
 import com.tongue.shippingservice.core.contracts.ApiResponse;
 import com.tongue.shippingservice.domain.Courier;
+import com.tongue.shippingservice.domain.RegistrationForm;
 import com.tongue.shippingservice.domain.TemporalAccessToken;
+import com.tongue.shippingservice.domain.dto.DriverAuthentication;
 import com.tongue.shippingservice.domain.replication.Driver;
 import com.tongue.shippingservice.repositories.DriverReplicationRepository;
 import com.tongue.shippingservice.services.CourierSessionHandler;
@@ -56,6 +58,33 @@ public class DriverRestController {
         return "hola";
     }
 
+    @PostMapping("/drivers/register")
+    public ResponseEntity<ApiResponse> register(@RequestBody RegistrationForm form){
+
+        log.info("Registering new user");
+
+        Driver.VehicleInfo vehicleInfo = Driver.VehicleInfo.builder()
+                .vehicle_brand(form.getCar())
+                .vehicle_licensePlate(form.getBrand())
+                .build();
+
+        Driver driver = Driver.builder()
+                .username(form.getEmail())
+                .firstname(form.getFirstName())
+                .lastname(form.getLastName())
+                .type(Driver.Type.COURIER)
+                .imageUrl("url")
+                .vehicleInfo(vehicleInfo)
+                .password(form.getPassword())
+                .build();
+
+        driver = repository.save(driver);
+
+        log.info("ok");
+        return ResponseEntity.of(Optional.of(ApiResponse.success(driver)));
+
+    }
+
     // Non secured endpoint for testing purposes
     @PostMapping( value = "/drivers/oauth", produces = "application/json", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponse> login(@RequestBody Driver driver1){
@@ -69,8 +98,14 @@ public class DriverRestController {
         log.info("User exists");
         Driver driver = optional.get();
         String jwt = createValidJWTToken(driver.getUsername());
+
+        DriverAuthentication authentication = DriverAuthentication.builder()
+                .jwt(jwt)
+                .driver(driver)
+                .build();
+
         log.info("ok");
-        return ResponseEntity.of(Optional.of(ApiResponse.success(jwt)));
+        return ResponseEntity.of(Optional.of(ApiResponse.success(authentication)));
     }
 
     // Friendly endpoint to ease the authentication process for Stomp connections

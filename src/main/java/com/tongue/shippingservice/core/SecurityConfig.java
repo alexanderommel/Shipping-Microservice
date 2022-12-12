@@ -50,6 +50,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/drivers/oauth").permitAll()
+                .antMatchers("/drivers/register").permitAll()
                 .antMatchers("/shipping/**").permitAll()
                 .anyRequest().authenticated()
                 .and()

@@ -29,6 +29,7 @@ public class Driver {
     private String imageUrl;
     private Type type;
     private VehicleInfo vehicleInfo;
+    private String password;
 
     public enum Type{
         RIDER,COURIER
