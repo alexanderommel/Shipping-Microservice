@@ -19,8 +19,6 @@
 
 - Publish/Subscribe Communication with customer/driver android apps using STOMP.
 
-- Data Replication between Microservices*
-
 - Session Management with Redis 
 
 - JWT Authentication
