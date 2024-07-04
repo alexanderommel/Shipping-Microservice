@@ -1,5 +1,5 @@
 # Shipping-Microservice
- SpringBoot Microservice part of the project Tongue, which is a personal project based on Uber eats system. This microservice is charged of the shipping part of an order fulfillment process, that is: 
+ SpringBoot Microservice part of the project Tongue, which is a personal project based on Uber eats and Rappi system. This microservice is charged of the shipping part of an order fulfillment process, that is: 
  
  1. Receive shipping requests
  2. Find a set of drivers/couriers
@@ -29,7 +29,7 @@
 
 - Delivery Service
 
-- Android app as frontend (Drivers App)
+- Android app as frontend (Couriers App)
 
 - Logging
 
